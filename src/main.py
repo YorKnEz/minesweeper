@@ -12,7 +12,7 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-# font = pygame.font.Font("assets/ldfcomicsans.ttf", 16)
+font = pygame.font.Font("assets/mine-sweeper.ttf", 16)
 
 
 def render(_):
