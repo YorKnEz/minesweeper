@@ -1,5 +1,7 @@
 import pygame
 
+from utils import draw_border
+
 
 class Counter:
     TEXT_BG_COLOR = pygame.Color("#500000")
@@ -28,6 +30,7 @@ class Counter:
 
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(screen, Counter.BG_COLOR, self.bounds)
+        draw_border(screen, self.bounds, pygame.Color("grey20"), width=8, depth="down")
         screen.blit(self.bg_text, self.text_rect)
         screen.blit(self.text, self.text_rect)
 

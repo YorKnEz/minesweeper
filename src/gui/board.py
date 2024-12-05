@@ -5,7 +5,7 @@ import pygame
 from constants import (BOARD_FLAG, BOARD_REVEAL, MOUSEBUTTONLEFT,
                        MOUSEBUTTONRIGHT)
 from state import BoardCell, GameState
-from utils import clamp
+from utils import clamp, draw_border
 
 
 class Board:
@@ -81,11 +81,11 @@ class Board:
         """
         self.surface.fill(Board.BG_COLOR)
 
-        # draw cells
+        # draw cells' backgrounds
         for i in range(self.height):
             for j in range(self.width):
-                # skip values of 0, their cells should be left as is
-                if self.board[i][j] == 0:
+                # skip cells that don't need a different background
+                if self.board[i][j] != BoardCell.BOMB_REVEALED.value and self.board[i][j] != BoardCell.BOMB.value:
                     continue
 
                 cell_bounds = pygame.rect.Rect(
@@ -95,16 +95,12 @@ class Board:
                     Board.CELL_SIZE,
                 )
 
-                # for unselected or flagged values (including bombs after the game is lost), draw them in a darker tone
-                if self.board[i][j] == BoardCell.UNSELECTED.value:
-                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
-                    # if the value was unselected, we can stop here
-                    continue
-                elif self.board[i][j] == BoardCell.FLAGGED.value or self.board[i][j] == BoardCell.BOMB.value:
-                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
-                # for bombs, draw the background in red
-                elif self.board[i][j] == BoardCell.BOMB_REVEALED.value:
+                # draw revealed bomb in red background
+                if self.board[i][j] == BoardCell.BOMB_REVEALED.value:
                     pygame.draw.rect(self.surface, Board.DANGER_COLOR, cell_bounds)
+                # draw regular bombs in darker bacground
+                elif self.board[i][j] == BoardCell.BOMB.value:
+                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
 
                 text = self.__cell_to_text(self.board[i][j])
                 rect = text.get_rect()
@@ -130,6 +126,35 @@ class Board:
                 (self.surface_bounds.right, self.surface_bounds.top + i * Board.CELL_SIZE),
                 Board.BORDER_WIDTH,
             )
+
+        # draw cells
+        for i in range(self.height):
+            for j in range(self.width):
+                # skip values of 0, their cells should be left as is
+                if self.board[i][j] == 0:
+                    continue
+
+                cell_bounds = pygame.rect.Rect(
+                    self.surface_bounds.left + j * Board.CELL_SIZE,
+                    self.surface_bounds.top + i * Board.CELL_SIZE,
+                    Board.CELL_SIZE,
+                    Board.CELL_SIZE,
+                )
+
+                # for unselected or flagged values (including bombs after the game is lost), draw them in a darker tone
+                if self.board[i][j] == BoardCell.UNSELECTED.value:
+                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
+                    draw_border(self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True)
+                    # if the value was unselected, we can stop here
+                    continue
+                elif self.board[i][j] == BoardCell.FLAGGED.value:
+                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
+                    draw_border(self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True)
+
+                text = self.__cell_to_text(self.board[i][j])
+                rect = text.get_rect()
+                rect.center = cell_bounds.center
+                self.surface.blit(text, rect)
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
@@ -176,3 +201,4 @@ class Board:
         Draw the board onto the screen in the area given by `self.bounds`.
         """
         screen.blit(self.surface, self.bounds.topleft, self.surface_area)
+        draw_border(screen, self.bounds, pygame.Color("grey20"), width=8, depth="down", inner=False)
