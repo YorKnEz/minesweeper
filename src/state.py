@@ -15,33 +15,70 @@ class BoardCell(Enum):
 
 
 class GameState:
+    # offsets for neighbors
+    DL = [-1, -1, 0, 1, 1, 1, 0, -1]
+    DC = [0, 1, 1, 1, 0, -1, -1, -1]
+
     def __init__(self, *, size: tuple[int, int] = (16, 16), max_bombs=64, time=0):
         """
         Initialize game state.
         """
         self.height, self.width = self.size = size
+        self.max_bombs = max_bombs
+        self.time_left = time
 
         # board with all bombs and all cells marked with their score
         self.zones = [[0 for _ in range(self.width)] for _ in range(self.height)]
 
-        self.max_bombs = max_bombs
-        bombs = max_bombs
+        # the board of the player, each cell has one of the values:
+        # - a positive value from 0 to 8 indicating the number of neighboring bombs
+        # - BoardCell.BOMB.value indicating that the cell is a bomb
+        # - BoardCell.UNSELECTED.value indicating that the player doesn't know yet the value of this cell
+        # - BoardCell.FLAGGED.value indicating that the player flagged this cell
+        #
+        # initially, the board is set on all field with UNSELECTED
+        self.board = [[BoardCell.UNSELECTED.value for _ in range(self.width)] for _ in range(self.height)]
 
-        # generate the board
+        self.game_over = False
+        self.init = False
+
+    def __within_bounds(self, lin, col):
+        """Check if point `(lin, col)` is found on the grid."""
+        return 0 <= lin < self.height and 0 <= col < self.width
+
+    def __around_cell(self, cell_lin, cell_col, lin, col):
+        """Check if `(lin, col)` is a point around or precisely `(cell_lin, cell_col)`."""
+        return (cell_lin == lin and cell_col == col) or any(
+            (cell_lin == lin + dl) and (cell_col == col + dc)
+            for dl, dc in zip(GameState.DL, GameState.DC)
+            if self.__within_bounds(lin + dl, col + dc)
+        )
+
+    def __start_game(self, lin, col):
+        """Initialize the game.
+
+        This generates the board for the game after the first click has happened. The `(lin, col)` argument specifies
+        the coordinates of the click.
+        It also starts the counter if there is any.
+        """
+        bombs = self.max_bombs
+
+        # generate the board such that no bomb is placed on (lin, col) or around it
         while bombs > 0:
             # randomly pick a place to place a bomb
             mine_col, mine_lin = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
 
-            # find a cell that is not a bomb
-            while self.zones[mine_lin][mine_col] == BoardCell.BOMB.value:
+            # find a cell that is not a bomb and is not on around start
+            while (self.zones[mine_lin][mine_col] == BoardCell.BOMB.value) or self.__around_cell(
+                lin, col, mine_lin, mine_col
+            ):
                 mine_col, mine_lin = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
+
+                # check if the generated position is either (lin, col) or around it
 
             self.zones[mine_lin][mine_col] = BoardCell.BOMB.value
 
             bombs -= 1
-
-        dl = [-1, -1, 0, 1, 1, 1, 0, -1]
-        dc = [0, 1, 1, 1, 0, -1, -1, -1]
 
         # complete the board with numbers
         for lin in range(self.height):
@@ -54,34 +91,20 @@ class GameState:
                 self.zones[lin][col] = sum(
                     self.__within_bounds(lin + off_lin, col + off_col)
                     and self.zones[lin + off_lin][col + off_col] == BoardCell.BOMB.value
-                    for off_lin, off_col in zip(dl, dc)
+                    for off_lin, off_col in zip(GameState.DL, GameState.DC)
                 )
-
-        # the board of the player, each cell has one of the values:
-        # - a positive value from 0 to 8 indicating the number of neighboring bombs
-        # - BoardCell.BOMB.value indicating that the cell is a bomb
-        # - BoardCell.UNSELECTED.value indicating that the player doesn't know yet the value of this cell
-        # - BoardCell.FLAGGED.value indicating that the player flagged this cell
-        #
-        # initially, the board is set on all field with UNSELECTED
-        self.board = [[BoardCell.UNSELECTED.value for _ in range(self.width)] for _ in range(self.height)]
-
-        self.game_over = False
 
         # set a timer for the game
         # the timer will emit GAME_TIMER_TICK event once every 1s `time` times
-        self.time_left = time
-        pygame.time.set_timer(TIMER_TICK, 1000, time)
+        pygame.time.set_timer(TIMER_TICK, 1000, self.time_left)
 
-    def __within_bounds(self, lin, col):
-        """
-        Check if point (l, c) is found on the grid.
-        """
-        return 0 <= lin < self.height and 0 <= col < self.width
+        # mark game as started
+        self.init = True
 
-    # offsets for neighbors
-    DL = [-1, -1, 0, 1, 1, 1, 0, -1]
-    DC = [0, 1, 1, 1, 0, -1, -1, -1]
+    def __end_game(self):
+        """Sets the `game_over` flag to True and stops the timer (if it exists)."""
+        self.game_over = True
+        pygame.time.set_timer(TIMER_TICK, 0)
 
     def __reveal_zone(self, lin, col):
         """
@@ -117,17 +140,14 @@ class GameState:
                 if self.zones[i][j] == BoardCell.BOMB.value:
                     self.board[i][j] = self.zones[i][j]
 
-    def __end_game(self):
-        """
-        Sets the `game_over` flag to True and stops the timer (if it exists).
-        """
-        self.game_over = True
-        pygame.time.set_timer(TIMER_TICK, 0)
-
     def reveal_zone(self, lin, col) -> "GameState":
         """
         Reveal the value of the selected zone.
         """
+        # if the game hasn't been initialized, start it
+        if not self.init:
+            self.__start_game(lin, col)
+
         new_state = deepcopy(self)
 
         # don't allow moves if game is over or if the move is invalid
@@ -145,8 +165,8 @@ class GameState:
         """
         new_state = deepcopy(self)
 
-        # don't allow moves if game is over or if the move is invalid
-        if self.game_over or not self.__within_bounds(lin, col):
+        # don't allow moves if game is over or if the move is invalid or if the game hasn't been started
+        if not self.init or self.game_over or not self.__within_bounds(lin, col):
             return new_state
 
         if new_state.board[lin][col] == BoardCell.UNSELECTED.value:
@@ -167,6 +187,10 @@ class GameState:
         Update the state on timer tick.
         """
         new_state = deepcopy(self)
+        # if the game hasn't been initialized, ignore the move
+        if not self.init:
+            return new_state
+
         new_state.time_left -= 1
 
         # if the timer ran out, end the game
