@@ -4,7 +4,7 @@ from enum import Enum
 
 import pygame
 
-from constants import TIMER_TICK
+from constants import BOARD_FLAG_PLACED, BOARD_FLAG_REMOVED, TIMER_TICK
 
 
 class BoardCell(Enum):
@@ -152,9 +152,11 @@ class GameState:
         if new_state.board[lin][col] == BoardCell.UNSELECTED.value:
             # if the cell is unselected, flag it
             new_state.board[lin][col] = BoardCell.FLAGGED.value
+            pygame.event.post(pygame.event.Event(BOARD_FLAG_PLACED))
         elif new_state.board[lin][col] == BoardCell.FLAGGED.value:
             # if the cell is flagged, unflag it
             new_state.board[lin][col] = BoardCell.UNSELECTED.value
+            pygame.event.post(pygame.event.Event(BOARD_FLAG_REMOVED))
 
         # if the cell was neither of the above, just ignore the move
 
@@ -166,8 +168,6 @@ class GameState:
         """
         new_state = deepcopy(self)
         new_state.time_left -= 1
-
-        print(new_state.time_left)
 
         # if the timer ran out, end the game
         if new_state.time_left == 0:
