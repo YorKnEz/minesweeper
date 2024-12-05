@@ -13,12 +13,14 @@ class Counter:
 
         self.bounds = bounds.copy()
         self.count = count
+        self.disabled = self.count == 0
 
         self._update_text()
 
     def _update_text(self):
         self.bg_text = self.font.render("888", True, Counter.TEXT_BG_COLOR)
-        self.text = self.font.render(f"{self.count:03}", True, Counter.TEXT_COLOR)
+        if not self.disabled:
+            self.text = self.font.render(f"{self.count:03}", True, Counter.TEXT_COLOR)
 
         self.text_rect = self.bg_text.get_rect()
         self.text_rect.height //= 2
@@ -32,5 +34,6 @@ class Counter:
         pygame.draw.rect(screen, Counter.BG_COLOR, self.bounds)
         draw_border(screen, self.bounds, pygame.Color("grey20"), width=8, depth="down")
         screen.blit(self.bg_text, self.text_rect)
-        screen.blit(self.text, self.text_rect)
+        if not self.disabled:
+            screen.blit(self.text, self.text_rect)
 
