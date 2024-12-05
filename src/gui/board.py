@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pygame
 
-from constants import (BOARD_FLAG_EVENT, BOARD_REVEAL_EVENT, MOUSEBUTTONLEFT,
+from constants import (BOARD_FLAG, BOARD_REVEAL, MOUSEBUTTONLEFT,
                        MOUSEBUTTONRIGHT)
 from state import BoardCell, GameState
 from utils import clamp
@@ -135,17 +135,15 @@ class Board:
         if event.type == pygame.MOUSEBUTTONUP:
             x, y = pygame.mouse.get_pos()
             l, c = self.__get_click_pos(x, y)
-            print(l, c)
 
             if event.button == MOUSEBUTTONLEFT:
-                pygame.event.post(pygame.event.Event(BOARD_REVEAL_EVENT, l=l, c=c))
+                pygame.event.post(pygame.event.Event(BOARD_REVEAL, l=l, c=c))
             elif event.button == MOUSEBUTTONRIGHT:
-                pygame.event.post(pygame.event.Event(BOARD_FLAG_EVENT, l=l, c=c))
+                pygame.event.post(pygame.event.Event(BOARD_FLAG, l=l, c=c))
         elif event.type == pygame.MOUSEBUTTONDOWN:
             x, y = pygame.mouse.get_pos()
             left, _, right = pygame.mouse.get_pressed()
             l, c = self.__get_click_pos(x, y)
-            print(l, c)
 
             if left:
                 pass

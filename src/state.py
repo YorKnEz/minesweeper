@@ -2,6 +2,10 @@ import random
 from copy import deepcopy
 from enum import Enum
 
+import pygame
+
+from constants import TIMER_TICK
+
 
 class BoardCell(Enum):
     BOMB_REVEALED = 17
@@ -11,7 +15,7 @@ class BoardCell(Enum):
 
 
 class GameState:
-    def __init__(self, *, size: tuple[int, int] = (16, 16), max_bombs=64):
+    def __init__(self, *, size: tuple[int, int] = (16, 16), max_bombs=64, time=0):
         """
         Initialize game state.
         """
@@ -20,6 +24,7 @@ class GameState:
         # board with all bombs and all cells marked with their score
         self.zones = [[0 for _ in range(self.width)] for _ in range(self.height)]
 
+        self.max_bombs = max_bombs
         bombs = max_bombs
 
         # generate the board
@@ -63,6 +68,11 @@ class GameState:
 
         self.game_over = False
 
+        # set a timer for the game
+        # the timer will emit GAME_TIMER_TICK event once every 1s `time` times
+        self.time_left = time
+        pygame.time.set_timer(TIMER_TICK, 1000, time)
+
     def __within_bounds(self, lin, col):
         """
         Check if point (l, c) is found on the grid.
@@ -86,7 +96,7 @@ class GameState:
 
         # if the cell is a bomb, game over
         if self.board[lin][col] == BoardCell.BOMB.value:
-            self.game_over = True
+            self.__end_game()
             self.__reveal_bombs()
             # assign a special type to this bomb so that the player knows which bomb caused the loss
             self.board[lin][col] = BoardCell.BOMB_REVEALED.value
@@ -107,6 +117,13 @@ class GameState:
                 if self.zones[i][j] == BoardCell.BOMB.value:
                     self.board[i][j] = self.zones[i][j]
 
+    def __end_game(self):
+        """
+        Sets the `game_over` flag to True and stops the timer (if it exists).
+        """
+        self.game_over = True
+        pygame.time.set_timer(TIMER_TICK, 0)
+
     def reveal_zone(self, lin, col) -> "GameState":
         """
         Reveal the value of the selected zone.
@@ -126,14 +143,11 @@ class GameState:
         """
         Flag/unflag the zone.
         """
-        # don't allow moves if game is over
-        if self.game_over:
-            raise ValueError("Game is over.")
-
-        if not self.__within_bounds(lin, col):
-            raise ValueError("Invalid board position.")
-
         new_state = deepcopy(self)
+
+        # don't allow moves if game is over or if the move is invalid
+        if self.game_over or not self.__within_bounds(lin, col):
+            return new_state
 
         if new_state.board[lin][col] == BoardCell.UNSELECTED.value:
             # if the cell is unselected, flag it
@@ -143,6 +157,21 @@ class GameState:
             new_state.board[lin][col] = BoardCell.UNSELECTED.value
 
         # if the cell was neither of the above, just ignore the move
+
+        return new_state
+
+    def timer_ticked(self):
+        """
+        Update the state on timer tick.
+        """
+        new_state = deepcopy(self)
+        new_state.time_left -= 1
+
+        print(new_state.time_left)
+
+        # if the timer ran out, end the game
+        if new_state.time_left == 0:
+            new_state.__end_game()
 
         return new_state
 
