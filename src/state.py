@@ -20,8 +20,11 @@ class GameState:
     DC = [0, 1, 1, 1, 0, -1, -1, -1]
 
     def __init__(self, *, size: tuple[int, int] = (16, 16), max_bombs=64, time=0):
-        """
-        Initialize game state.
+        """Initialize game state.
+
+        The `size` parameter determines the size of the grid.
+        The `max_bombs` parameter determines the number of bombs to generate, it must be between 0 and `size`.
+        The `time` parameter determines how much time the player has (if it is 0, then the timer is disabled).
         """
         self.height, self.width = self.size = size
         self.max_bombs = max_bombs
@@ -107,9 +110,7 @@ class GameState:
         pygame.time.set_timer(TIMER_TICK, 0)
 
     def __reveal_zone(self, lin, col):
-        """
-        Recursively reveal the current zone until a non-zero value is met.
-        """
+        """Recursively reveal the current zone until a non-zero value is met."""
         # if the cell is already revealed or flagged, stop
         if self.board[lin][col] != BoardCell.UNSELECTED.value or self.board[lin][col] == BoardCell.FLAGGED.value:
             return
@@ -132,17 +133,21 @@ class GameState:
                     self.__reveal_zone(lin + dl, col + dc)
 
     def __reveal_bombs(self):
-        """
-        Upon losing the game, this method is called to reveal the bombs locations to the player.
-        """
+        """Upon losing the game, this method is called to reveal the bombs locations to the player."""
         for i in range(self.height):
             for j in range(self.width):
                 if self.zones[i][j] == BoardCell.BOMB.value:
                     self.board[i][j] = self.zones[i][j]
 
     def reveal_zone(self, lin, col) -> "GameState":
-        """
-        Reveal the value of the selected zone.
+        """Reveal the value of the selected zone.
+
+        If the game has not been started yet, this method calls `__start_game` which initializes the board and starts
+        the timer countdown.
+
+        If the game is over or the given position is invalid, the move is ignored.
+
+        It returns the new state of the game, thus keeping the state immutable.
         """
         # if the game hasn't been initialized, start it
         if not self.init:
@@ -160,8 +165,11 @@ class GameState:
         return new_state
 
     def flag_zone(self, lin, col):
-        """
-        Flag/unflag the zone.
+        """Flag/unflag the zone.
+
+        If the game has not been started yet, or the game is over or the given position is invalid, the move is ignored.
+
+        It returns the new state of the game, thus keeping the state immutable.
         """
         new_state = deepcopy(self)
 
@@ -183,10 +191,14 @@ class GameState:
         return new_state
 
     def timer_ticked(self):
-        """
-        Update the state on timer tick.
+        """Update the state on timer tick.
+
+        If the game has not started yet, the move is ignored.
+
+        It returns the new state of the game, thus keeping the state immutable.
         """
         new_state = deepcopy(self)
+
         # if the game hasn't been initialized, ignore the move
         if not self.init:
             return new_state
@@ -200,4 +212,5 @@ class GameState:
         return new_state
 
     def is_over(self):
+        """Check if the game has ended."""
         return self.game_over

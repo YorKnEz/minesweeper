@@ -28,6 +28,7 @@ timer = Timer(timer_bounds, state)
 bomb_cnt_bounds = pygame.Rect(board_bounds.right - 100, board_bounds.top - 96, 100, 64)
 bomb_cnt = BombCounter(bomb_cnt_bounds, state)
 
+
 def render(_):
     screen.fill("grey20")
 

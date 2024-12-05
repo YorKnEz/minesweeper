@@ -9,6 +9,10 @@ class Counter:
     BG_COLOR = "black"
 
     def __init__(self, bounds: pygame.Rect, count: int):
+        """Initialize the counter.
+
+        If the `count` is zero, then the counter is rendered as disabled.
+        """
         self.font = pygame.font.Font("assets/seven-segment.ttf", 48)
 
         self.bounds = bounds.copy()
@@ -28,12 +32,16 @@ class Counter:
         self.text_rect.center = (self.bounds.centerx + 3, self.bounds.centery - self.text_rect.height - 1)
 
     def handle_event(self, event):
+        """Event handler.
+
+        Raises `NotImplementedError` since the derived classes must implement it.
+        """
         raise NotImplementedError()
 
     def draw(self, screen: pygame.Surface):
+        """Draw the counter on the screen."""
         pygame.draw.rect(screen, Counter.BG_COLOR, self.bounds)
         draw_border(screen, self.bounds, pygame.Color("grey20"), width=8, depth="down")
         screen.blit(self.bg_text, self.text_rect)
         if not self.disabled:
             screen.blit(self.text, self.text_rect)
-

@@ -9,10 +9,9 @@ from utils import clamp, draw_border
 
 
 class Board:
-    """
-    Class for managing the board display of the game.
+    """Class for managing the board display of the game.
 
-    It can display a board of any size, even if it doesn't fit the screen by using mouse dragging for navigating.
+    It can display a board of any size, even if it doesn't fit the screen.
     """
 
     BG_COLOR = "grey50"
@@ -28,9 +27,7 @@ class Board:
     BOARD_SHIFT = {pygame.K_LEFT: (-1, 0), pygame.K_UP: (0, -1), pygame.K_RIGHT: (1, 0), pygame.K_DOWN: (0, 1)}
 
     def __init__(self, bounds: pygame.Rect, state: GameState, font: pygame.font.Font):
-        """
-        Init the board based on the current state of the game.
-        """
+        """Init the board based on the current state of the game."""
         self.bounds = bounds.copy()
         self.font = font
 
@@ -48,18 +45,14 @@ class Board:
         self.__update_surface()
 
     def __get_click_pos(self, mouse_x, mouse_y):
-        """
-        Return cell coordinates of clicked cell.
-        """
+        """Return cell coordinates of clicked cell."""
         # normalize mouse coords to surface coords
         mouse_x += self.surface_area.left - self.bounds.left
         mouse_y += self.surface_area.top - self.bounds.top
         return mouse_y // Board.CELL_SIZE, mouse_x // Board.CELL_SIZE
 
     def __cell_to_text(self, cell):
-        """
-        Converts a cell value to a text element to be rendered
-        """
+        """Converts a cell value to a text element to be rendered."""
         if cell == BoardCell.BOMB.value or cell == BoardCell.BOMB_REVEALED.value:
             text = "*"
             color = "black"
@@ -73,11 +66,10 @@ class Board:
         return self.font.render(text, True, color)
 
     def __update_surface(self):
-        """
-        Create a surface on which the whole board is drawn.
+        """Create a surface on which the whole board is drawn.
 
         Borders are drawn over the cells, so they don't take space.
-        A board of size n x m will have w = Board.CELL_SIZE * n, h = Board.CELL_SIZE * m pixels
+        A board of size `n x m` will have `w = Board.CELL_SIZE * n`, `h = Board.CELL_SIZE * m` pixels.
         """
         self.surface.fill(Board.BG_COLOR)
 
@@ -144,12 +136,16 @@ class Board:
                 # for unselected or flagged values (including bombs after the game is lost), draw them in a darker tone
                 if self.board[i][j] == BoardCell.UNSELECTED.value:
                     pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
-                    draw_border(self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True)
+                    draw_border(
+                        self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True
+                    )
                     # if the value was unselected, we can stop here
                     continue
                 elif self.board[i][j] == BoardCell.FLAGGED.value:
                     pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
-                    draw_border(self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True)
+                    draw_border(
+                        self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True
+                    )
 
                 text = self.__cell_to_text(self.board[i][j])
                 rect = text.get_rect()
@@ -157,6 +153,7 @@ class Board:
                 self.surface.blit(text, rect)
 
     def handle_event(self, event):
+        """Event handler."""
         if event.type == pygame.MOUSEBUTTONUP:
             x, y = pygame.mouse.get_pos()
             l, c = self.__get_click_pos(x, y)
@@ -188,17 +185,13 @@ class Board:
             self.surface_area.y = clamp(self.surface_area.y + off_y, 0, self.surface_bounds.height - self.bounds.height)
 
     def update(self, state: GameState):
-        """
-        Update the board with the given state.
-        """
+        """Update the board with the given state."""
         self.height, self.width = state.size
         self.board = deepcopy(state.board)
 
         self.__update_surface()
 
     def draw(self, screen: pygame.Surface):
-        """
-        Draw the board onto the screen in the area given by `self.bounds`.
-        """
+        """Draw the board onto the screen in the area given by `self.bounds`."""
         screen.blit(self.surface, self.bounds.topleft, self.surface_area)
         draw_border(screen, self.bounds, pygame.Color("grey20"), width=8, depth="down", inner=False)
