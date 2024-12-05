@@ -80,8 +80,8 @@ class GameState:
         return 0 <= lin < self.height and 0 <= col < self.width
 
     # offsets for neighbors
-    DL = [-1, 0, 1, 0]
-    DC = [0, 1, 0, -1]
+    DL = [-1, -1, 0, 1, 1, 1, 0, -1]
+    DC = [0, 1, 1, 1, 0, -1, -1, -1]
 
     def __reveal_zone(self, lin, col):
         """
