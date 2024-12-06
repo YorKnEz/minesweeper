@@ -18,7 +18,7 @@ class Window:
         self.start_window = StartWindow(width, height, font, self)
         self.game_window = GameWindow(width, height, font, self)
 
-        self.current_window: WindowBase = self.game_window
+        self.current_window: WindowBase = self.start_window
 
     def handle_event(self, event: pygame.event.Event):
         """Event handler."""
