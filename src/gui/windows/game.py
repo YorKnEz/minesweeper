@@ -1,7 +1,8 @@
 import pygame
 
-from constants import BOARD_FLAG, BOARD_REVEAL, GAME_OVER, TIMER_TICK
+from constants import BOARD_FLAG, BOARD_REVEAL, GAME_OVER, GAME_RESTART, TIMER_TICK
 from gui import Board, BombCounter, Timer
+from gui.button import Button
 from gui.windows.window_base import WindowBase
 from state import GameState
 from theme import Theme
@@ -24,6 +25,11 @@ class GameWindow(WindowBase):
 
         bomb_cnt_bounds = pygame.Rect(board_bounds.right - 100, board_bounds.top - 96, 100, 64)
         self.bomb_cnt = BombCounter(bomb_cnt_bounds, self.state)
+
+        restart_button_bounds = pygame.Rect((width - 64) / 2, board_bounds.top - 96, 64, 64)
+        self.restart_button = Button(
+            restart_button_bounds, Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, GAME_RESTART
+        )
 
     def handle_event(self, event: pygame.event.Event) -> "WindowBase":
         """Event handler."""
@@ -50,6 +56,7 @@ class GameWindow(WindowBase):
         """Draw game on the screen."""
         self.board.draw(screen)
         self.timer.draw(screen)
+        self.restart_button.draw(screen)
         self.bomb_cnt.draw(screen)
 
         draw_border(screen, screen.get_rect(), pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=True)

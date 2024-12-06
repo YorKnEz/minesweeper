@@ -195,7 +195,7 @@ class Board:
 
         self.__update_surface()
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, surface: pygame.Surface):
         """Draw the board onto the screen in the area given by `self.bounds`."""
-        screen.blit(self.surface, self.bounds.topleft, self.surface_area)
-        draw_border(screen, self.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="down", inner=False)
+        surface.blit(self.surface, self.bounds.topleft, self.surface_area)
+        draw_border(surface, self.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="down", inner=False)

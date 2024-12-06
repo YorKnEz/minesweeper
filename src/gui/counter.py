@@ -35,10 +35,10 @@ class Counter:
         """
         raise NotImplementedError()
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, surface: pygame.Surface):
         """Draw the counter on the screen."""
-        pygame.draw.rect(screen, Theme.TIMER_BG_COLOR, self.bounds)
-        draw_border(screen, self.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="down")
-        screen.blit(self.bg_text, self.text_rect)
+        pygame.draw.rect(surface, Theme.TIMER_BG_COLOR, self.bounds)
+        draw_border(surface, self.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="down")
+        surface.blit(self.bg_text, self.text_rect)
         if not self.disabled:
-            screen.blit(self.text, self.text_rect)
+            surface.blit(self.text, self.text_rect)

@@ -1,5 +1,5 @@
 import pygame
-from constants import START_GAME
+from constants import GAME_START
 from gui import Input
 from gui import Button
 from gui.windows.window_base import WindowBase
@@ -13,15 +13,20 @@ class StartWindow(WindowBase):
         self.font = font
         self.context = context
 
-        self.input = Input(pygame.Rect(0, 0, 100, 32), self.font, 3)
-        self.button = Button(pygame.Rect(0, 32, 100, 64), Theme.BG_COLOR, "Test", Theme.TEXT_COLOR, self.font, START_GAME)
+        input_bounds = pygame.Rect(0, 0, 200, 32)
+        input_bounds.center = (width / 2, height / 2 - 80)
+        self.input = Input(input_bounds, self.font, 3)
+
+        button_bounds = pygame.Rect(0, 0, 200, 64)
+        button_bounds.center = (width / 2, height / 2)
+        self.button = Button(button_bounds, Theme.BG_COLOR, "Start game", Theme.TEXT_COLOR, self.font, GAME_START)
 
     def handle_event(self, event: pygame.event.Event) -> "WindowBase":
         """Event handler."""
         self.input.handle_event(event)
         self.button.handle_event(event)
 
-        if event.type == START_GAME:
+        if event.type == GAME_START:
             return self.context.game_window
 
         return self

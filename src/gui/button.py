@@ -34,4 +34,4 @@ class Button:
         pygame.draw.rect(screen, self.bg_color, self.bounds)
         screen.blit(self.text, self.text_rect)
 
-        draw_border(screen, self.bounds, pygame.Color(self.bg_color), width=8, depth="up", inner=True)
+        draw_border(screen, self.bounds, pygame.Color(self.bg_color), width=8, depth="up", inner=False)

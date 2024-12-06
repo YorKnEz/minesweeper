@@ -1,5 +1,8 @@
 import pygame
 
+from theme import Theme
+from utils import draw_border
+
 
 class Input:
     def __init__(self, bounds, font, max_length, text_color=(255, 255, 255), bg_color=(0, 0, 0)):
@@ -59,6 +62,8 @@ class Input:
             pygame.draw.line(
                 surface, self.text_color, (cursor_x, cursor_y), (cursor_x, cursor_y + text_surface.get_height()), 2
             )
+
+        draw_border(surface, self.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="down", inner=False)
 
     def set_active(self, active):
         """Set whether the text box is active."""
