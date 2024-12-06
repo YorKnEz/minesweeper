@@ -4,7 +4,7 @@ from enum import Enum
 
 import pygame
 
-from constants import BOARD_FLAG_PLACED, BOARD_FLAG_REMOVED, TIMER_TICK
+from constants import BOARD_FLAG_PLACED, BOARD_FLAG_REMOVED, GAME_OVER, TIMER_TICK
 
 
 class BoardCell(Enum):
@@ -44,6 +44,7 @@ class GameState:
 
         self.game_over = False
         self.init = False
+        self.unrevealed_zones = self.width * self.height  # used for checking the win condition
 
     def __within_bounds(self, lin, col):
         """Check if point `(lin, col)` is found on the grid."""
@@ -108,6 +109,7 @@ class GameState:
         """Sets the `game_over` flag to True and stops the timer (if it exists)."""
         self.game_over = True
         pygame.time.set_timer(TIMER_TICK, 0)
+        pygame.event.post(pygame.event.Event(GAME_OVER))
 
     def __reveal_zone(self, lin, col):
         """Recursively reveal the current zone until a non-zero value is met."""
@@ -117,6 +119,7 @@ class GameState:
 
         # reveal zone
         self.board[lin][col] = self.zones[lin][col]
+        self.unrevealed_zones -= 1
 
         # if the cell is a bomb, game over
         if self.board[lin][col] == BoardCell.BOMB.value:
@@ -161,6 +164,10 @@ class GameState:
 
         # explore new cells
         new_state.__reveal_zone(lin, col)
+
+        # if the number of unrevealed_zones is equal to the number of bombs, then the game is over
+        if self.is_win():
+            self.__end_game()
 
         return new_state
 
@@ -214,3 +221,8 @@ class GameState:
     def is_over(self):
         """Check if the game has ended."""
         return self.game_over
+
+    def is_win(self):
+        """Check if the game was won or not."""
+        # if the number of unrevealed_zones is equal to the number of bombs, then the game is over
+        return self.unrevealed_zones == self.max_bombs
