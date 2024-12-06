@@ -1,6 +1,7 @@
 import pygame
 
 from constants import MOUSEBUTTONLEFT
+from utils import draw_border
 
 
 class Button:
@@ -21,11 +22,16 @@ class Button:
     def handle_event(self, event):
         """Event handler."""
         # check if the user clicked the button and fire the given event
-        if event.type == pygame.MOUSEBUTTONUP and event.button == MOUSEBUTTONLEFT and self.bounds.collidepoint(pygame.mouse.get_pos()):
+        if (
+            event.type == pygame.MOUSEBUTTONUP
+            and event.button == MOUSEBUTTONLEFT
+            and self.bounds.collidepoint(pygame.mouse.get_pos())
+        ):
             pygame.event.post(pygame.event.Event(self.click_event))
-
 
     def draw(self, screen: pygame.Surface):
         """Draw handler."""
         pygame.draw.rect(screen, self.bg_color, self.bounds)
         screen.blit(self.text, self.text_rect)
+
+        draw_border(screen, self.bounds, pygame.Color(self.bg_color), width=8, depth="up", inner=True)

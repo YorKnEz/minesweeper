@@ -2,6 +2,7 @@ import pygame
 
 from constants import FPS
 from gui.windows.window import Window
+from theme import Theme
 
 pygame.init()
 pygame.display.set_caption("Minesweeper")
@@ -24,7 +25,7 @@ while running:
 
         window.handle_event(event)
 
-    screen.fill("grey20")
+    screen.fill(Theme.BG_COLOR)
 
     window.draw(screen)
 

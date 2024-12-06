@@ -3,6 +3,8 @@ from constants import START_GAME
 from gui import Input
 from gui import Button
 from gui.windows.window_base import WindowBase
+from theme import Theme
+from utils import draw_border
 
 
 class StartWindow(WindowBase):
@@ -12,8 +14,7 @@ class StartWindow(WindowBase):
         self.context = context
 
         self.input = Input(pygame.Rect(0, 0, 100, 32), self.font, 3)
-        self.button = Button(pygame.Rect(0, 32, 100, 32), "grey40", "Test", "white", self.font, START_GAME)
-
+        self.button = Button(pygame.Rect(0, 32, 100, 64), Theme.BG_COLOR, "Test", Theme.TEXT_COLOR, self.font, START_GAME)
 
     def handle_event(self, event: pygame.event.Event) -> "WindowBase":
         """Event handler."""
@@ -29,3 +30,5 @@ class StartWindow(WindowBase):
         """Draw game on the screen."""
         self.input.draw(screen)
         self.button.draw(screen)
+
+        draw_border(screen, screen.get_rect(), pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=True)

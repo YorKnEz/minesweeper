@@ -1,13 +1,10 @@
 import pygame
 
+from theme import Theme
 from utils import draw_border
 
 
 class Counter:
-    TEXT_BG_COLOR = pygame.Color("#500000")
-    TEXT_COLOR = "firebrick1"
-    BG_COLOR = "black"
-
     def __init__(self, bounds: pygame.Rect, count: int):
         """Initialize the counter.
 
@@ -22,9 +19,9 @@ class Counter:
         self._update_text()
 
     def _update_text(self):
-        self.bg_text = self.font.render("888", True, Counter.TEXT_BG_COLOR)
+        self.bg_text = self.font.render("888", True, Theme.TIMER_TEXT_COLOR_DISABLED)
         if not self.disabled:
-            self.text = self.font.render(f"{self.count:03}", True, Counter.TEXT_COLOR)
+            self.text = self.font.render(f"{self.count:03}", True, Theme.TIMER_TEXT_COLOR)
 
         self.text_rect = self.bg_text.get_rect()
         self.text_rect.height //= 2
@@ -40,8 +37,8 @@ class Counter:
 
     def draw(self, screen: pygame.Surface):
         """Draw the counter on the screen."""
-        pygame.draw.rect(screen, Counter.BG_COLOR, self.bounds)
-        draw_border(screen, self.bounds, pygame.Color("grey20"), width=8, depth="down")
+        pygame.draw.rect(screen, Theme.TIMER_BG_COLOR, self.bounds)
+        draw_border(screen, self.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="down")
         screen.blit(self.bg_text, self.text_rect)
         if not self.disabled:
             screen.blit(self.text, self.text_rect)

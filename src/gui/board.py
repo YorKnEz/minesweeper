@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import pygame
 
-from constants import (BOARD_FLAG, BOARD_REVEAL, MOUSEBUTTONLEFT,
-                       MOUSEBUTTONRIGHT)
+from constants import BOARD_FLAG, BOARD_REVEAL, MOUSEBUTTONLEFT, MOUSEBUTTONRIGHT
 from state import BoardCell, GameState
+from theme import Theme
 from utils import clamp, draw_border
 
 
@@ -14,15 +14,9 @@ class Board:
     It can display a board of any size, even if it doesn't fit the screen.
     """
 
-    BG_COLOR = "grey50"
-    UNSELECTED_COLOR = "grey30"
-    DANGER_COLOR = "darkred"
-
-    BORDER_COLOR = "grey20"
     BORDER_WIDTH = 2
 
     CELL_SIZE = 32
-    CELL_COLORS = ["blue", "green", "red", "purple"]
 
     BOARD_SHIFT = {pygame.K_LEFT: (-1, 0), pygame.K_UP: (0, -1), pygame.K_RIGHT: (1, 0), pygame.K_DOWN: (0, 1)}
 
@@ -61,7 +55,7 @@ class Board:
             color = "red"
         else:
             text = str(cell)
-            color = Board.CELL_COLORS[(cell - 1) % len(Board.CELL_COLORS)]
+            color = Theme.CELL_COLORS[(cell - 1) % len(Theme.CELL_COLORS)]
 
         return self.font.render(text, True, color)
 
@@ -71,7 +65,7 @@ class Board:
         Borders are drawn over the cells, so they don't take space.
         A board of size `n x m` will have `w = Board.CELL_SIZE * n`, `h = Board.CELL_SIZE * m` pixels.
         """
-        self.surface.fill(Board.BG_COLOR)
+        self.surface.fill(Theme.REVEALED_BG_COLOR)
 
         # draw cells' backgrounds
         for i in range(self.height):
@@ -89,10 +83,10 @@ class Board:
 
                 # draw revealed bomb in red background
                 if self.board[i][j] == BoardCell.BOMB_REVEALED.value:
-                    pygame.draw.rect(self.surface, Board.DANGER_COLOR, cell_bounds)
+                    pygame.draw.rect(self.surface, Theme.REVEALED_BOMB_BG_COLOR, cell_bounds)
                 # draw regular bombs in darker bacground
                 elif self.board[i][j] == BoardCell.BOMB.value:
-                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
+                    pygame.draw.rect(self.surface, Theme.UNREVEALED_BG_COLOR, cell_bounds)
 
                 text = self.__cell_to_text(self.board[i][j])
                 rect = text.get_rect()
@@ -103,7 +97,7 @@ class Board:
         for j in range(self.width):
             pygame.draw.line(
                 self.surface,
-                Board.BORDER_COLOR,
+                Theme.BG_COLOR,
                 (self.surface_bounds.left + j * Board.CELL_SIZE, self.surface_bounds.top),
                 (self.surface_bounds.left + j * Board.CELL_SIZE, self.surface_bounds.bottom),
                 Board.BORDER_WIDTH,
@@ -113,7 +107,7 @@ class Board:
         for i in range(self.height):
             pygame.draw.line(
                 self.surface,
-                Board.BORDER_COLOR,
+                Theme.BG_COLOR,
                 (self.surface_bounds.left, self.surface_bounds.top + i * Board.CELL_SIZE),
                 (self.surface_bounds.right, self.surface_bounds.top + i * Board.CELL_SIZE),
                 Board.BORDER_WIDTH,
@@ -135,16 +129,26 @@ class Board:
 
                 # for unselected or flagged values (including bombs after the game is lost), draw them in a darker tone
                 if self.board[i][j] == BoardCell.UNSELECTED.value:
-                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
+                    pygame.draw.rect(self.surface, Theme.UNREVEALED_BG_COLOR, cell_bounds)
                     draw_border(
-                        self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True
+                        self.surface,
+                        cell_bounds,
+                        pygame.Color(Theme.UNREVEALED_BG_COLOR),
+                        width=4,
+                        depth="up",
+                        inner=True,
                     )
                     # if the value was unselected, we can stop here
                     continue
                 elif self.board[i][j] == BoardCell.FLAGGED.value:
-                    pygame.draw.rect(self.surface, Board.UNSELECTED_COLOR, cell_bounds)
+                    pygame.draw.rect(self.surface, Theme.UNREVEALED_BG_COLOR, cell_bounds)
                     draw_border(
-                        self.surface, cell_bounds, pygame.Color(Board.UNSELECTED_COLOR), width=4, depth="up", inner=True
+                        self.surface,
+                        cell_bounds,
+                        pygame.Color(Theme.UNREVEALED_BG_COLOR),
+                        width=4,
+                        depth="up",
+                        inner=True,
                     )
 
                 text = self.__cell_to_text(self.board[i][j])
@@ -194,4 +198,4 @@ class Board:
     def draw(self, screen: pygame.Surface):
         """Draw the board onto the screen in the area given by `self.bounds`."""
         screen.blit(self.surface, self.bounds.topleft, self.surface_area)
-        draw_border(screen, self.bounds, pygame.Color("grey20"), width=8, depth="down", inner=False)
+        draw_border(screen, self.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="down", inner=False)

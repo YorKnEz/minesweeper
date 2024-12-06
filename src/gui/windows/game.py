@@ -4,6 +4,7 @@ from constants import BOARD_FLAG, BOARD_REVEAL, GAME_OVER, TIMER_TICK
 from gui import Board, BombCounter, Timer
 from gui.windows.window_base import WindowBase
 from state import GameState
+from theme import Theme
 from utils import draw_border
 
 
@@ -51,4 +52,4 @@ class GameWindow(WindowBase):
         self.timer.draw(screen)
         self.bomb_cnt.draw(screen)
 
-        draw_border(screen, screen.get_rect(), pygame.Color("grey20"), width=8, depth="up", inner=True)
+        draw_border(screen, screen.get_rect(), pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=True)
