@@ -41,15 +41,9 @@ class GameWindow(WindowBase):
             restart_button_bounds, Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, GAME_RESTART
         )
 
-        self.restart_icon = pygame.transform.scale(
-            pygame.image.load("assets/reset.png").convert_alpha(), (48, 48)
-        )
-        self.lose_icon = pygame.transform.scale(
-            pygame.image.load("assets/lose.png").convert_alpha(), (48, 48)
-        )
-        self.win_icon = pygame.transform.scale(
-            pygame.image.load("assets/win.png").convert_alpha(), (48, 48)
-        )
+        self.restart_icon = pygame.transform.scale(pygame.image.load("assets/reset.png").convert_alpha(), (48, 48))
+        self.lose_icon = pygame.transform.scale(pygame.image.load("assets/lose.png").convert_alpha(), (48, 48))
+        self.win_icon = pygame.transform.scale(pygame.image.load("assets/win.png").convert_alpha(), (48, 48))
         self.icon = self.restart_icon
         self.icon_pos = (restart_button_bounds.x + 8, restart_button_bounds.y + 8)
 
