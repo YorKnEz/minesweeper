@@ -16,7 +16,7 @@ class Input:
         self.text = ""
         self.cursor_pos = 0
 
-        self.active = True  # Input box starts active by default
+        self.active = False  # Input box starts active by default
 
     def handle_event(self, event):
         """Handle keyboard events for the text input."""
@@ -43,6 +43,12 @@ class Input:
                 if event.unicode.isdigit() and len(self.text) < self.max_length:
                     self.text = self.text[: self.cursor_pos] + event.unicode + self.text[self.cursor_pos :]
                     self.cursor_pos += 1
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == MOUSEBUTTONLEFT:
+            # activate the input if it's been clicked
+            if self.bounds.collidepoint(pygame.mouse.get_pos()):
+                self.active = True
+            else:
+                self.active = False
 
     def draw(self, surface):
         """Render the text input box and its content."""
