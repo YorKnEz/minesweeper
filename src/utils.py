@@ -9,6 +9,10 @@ def clamp(x, a, b):
     return max(a, min(b, x))
 
 
+def adjust_color(color, factor):
+    return tuple(min(255, max(0, int(c * factor))) for c in color)
+
+
 def draw_border(
     surface: pygame.Surface, bounds: pygame.Rect, border_color: pygame.Color, width=1, depth="up", inner=False
 ):
@@ -16,9 +20,6 @@ def draw_border(
 
     Depth parameter can be either "up" or "down" specifying the effect the border will have.
     """
-
-    def adjust_color(color, factor):
-        return tuple(min(255, max(0, int(c * factor))) for c in color)
 
     lighter_color = adjust_color(border_color, 1.3 if depth == "up" else 0.7)
     darker_color = adjust_color(border_color, 0.7 if depth == "up" else 1.3)

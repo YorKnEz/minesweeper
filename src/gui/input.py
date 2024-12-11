@@ -1,11 +1,12 @@
 import pygame
 
+from constants import MOUSEBUTTONLEFT
 from theme import Theme
-from utils import draw_border
+from utils import adjust_color, draw_border
 
 
 class Input:
-    def __init__(self, bounds, font, max_length, text_color=(255, 255, 255), bg_color=(0, 0, 0)):
+    def __init__(self, bounds, font, max_length, placeholder="", text_color=(255, 255, 255), bg_color=(0, 0, 0)):
         """Initialize a single-line text input."""
         self.bounds = pygame.Rect(bounds)
         self.font = font
@@ -14,6 +15,7 @@ class Input:
         self.max_length = max_length
 
         self.text = ""
+        self.placeholder = placeholder
         self.cursor_pos = 0
 
         self.active = False  # Input box starts active by default
@@ -56,10 +58,16 @@ class Input:
         pygame.draw.rect(surface, self.bg_color, self.bounds)
 
         # Render the text
-        text_surface = self.font.render(self.text, True, self.text_color)
-        surface.blit(
-            text_surface, (self.bounds.x + 5, self.bounds.y + (self.bounds.height - text_surface.get_height()) // 2)
-        )
+        if len(self.text) == 0:
+            text_surface = self.font.render(self.placeholder, True, adjust_color(self.text_color, 0.3))
+            surface.blit(
+                text_surface, (self.bounds.x + 5, self.bounds.y + (self.bounds.height - text_surface.get_height()) // 2)
+            )
+        else:
+            text_surface = self.font.render(self.text, True, self.text_color)
+            surface.blit(
+                text_surface, (self.bounds.x + 5, self.bounds.y + (self.bounds.height - text_surface.get_height()) // 2)
+            )
 
         # Draw the cursor
         if self.active:
