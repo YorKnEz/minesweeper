@@ -1,6 +1,7 @@
 import pygame
 
-from constants import BOARD_FLAG, BOARD_REVEAL, GAME_OVER, GAME_RESTART, TIMER_TICK
+from constants import (BOARD_FLAG, BOARD_REVEAL, GAME_OVER, GAME_RESTART,
+                       TIMER_TICK)
 from gui import Board, BombCounter, Timer
 from gui.button import Button
 from gui.windows.window_base import WindowBase
@@ -12,12 +13,21 @@ from utils import draw_border
 class GameWindow(WindowBase):
     def __init__(self, width, height, font: pygame.font.Font, context):
         """Initializes the game window."""
+        self.width, self.height = width, height
         self.font = font
         self.context = context
 
-        self.state = GameState(size=(16, 16), max_bombs=32, time=10)
+        self.enter()
 
-        board_bounds = pygame.Rect((width - 512) / 2, 64 + (height - 512) / 2, 512, 512)
+    def enter(self):
+        # init the game using context params
+        self.state = GameState(
+            size=(self.context.x, self.context.y),
+            max_bombs=self.context.bombs,
+            time=self.context.time,
+        )
+
+        board_bounds = pygame.Rect((self.width - 512) / 2, 64 + (self.height - 512) / 2, 512, 512)
         self.board = Board(board_bounds, self.state, self.font)
 
         timer_bounds = pygame.Rect(board_bounds.left, board_bounds.top - 96, 100, 64)
@@ -26,13 +36,18 @@ class GameWindow(WindowBase):
         bomb_cnt_bounds = pygame.Rect(board_bounds.right - 100, board_bounds.top - 96, 100, 64)
         self.bomb_cnt = BombCounter(bomb_cnt_bounds, self.state)
 
-        restart_button_bounds = pygame.Rect((width - 64) / 2, board_bounds.top - 96, 64, 64)
+        restart_button_bounds = pygame.Rect((self.width - 64) / 2, board_bounds.top - 96, 64, 64)
         self.restart_button = Button(
             restart_button_bounds, Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, GAME_RESTART
         )
 
-    def handle_event(self, event: pygame.event.Event) -> "WindowBase":
+    def handle_event(self, event: pygame.event.Event):
         """Event handler."""
+        self.board.handle_event(event)
+        self.timer.handle_event(event)
+        self.bomb_cnt.handle_event(event)
+        self.restart_button.handle_event(event)
+
         if event.type == BOARD_REVEAL:
             l, c = event.dict.values()
             self.state = self.state.reveal_zone(l, c)
@@ -44,13 +59,10 @@ class GameWindow(WindowBase):
         elif event.type == TIMER_TICK:
             self.state = self.state.timer_ticked()
         elif event.type == GAME_OVER:
-            return self.context.start_window
-
-        self.board.handle_event(event)
-        self.timer.handle_event(event)
-        self.bomb_cnt.handle_event(event)
-
-        return self
+            pass
+        elif event.type == GAME_RESTART:
+            # restart game
+            self.context.set_window(self.context.game_window)
 
     def draw(self, screen: pygame.Surface):
         """Draw game on the screen."""
