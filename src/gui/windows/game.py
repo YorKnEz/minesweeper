@@ -41,6 +41,18 @@ class GameWindow(WindowBase):
             restart_button_bounds, Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, GAME_RESTART
         )
 
+        self.restart_icon = pygame.transform.scale(
+            pygame.image.load("assets/reset.png").convert_alpha(), (48, 48)
+        )
+        self.lose_icon = pygame.transform.scale(
+            pygame.image.load("assets/lose.png").convert_alpha(), (48, 48)
+        )
+        self.win_icon = pygame.transform.scale(
+            pygame.image.load("assets/win.png").convert_alpha(), (48, 48)
+        )
+        self.icon = self.restart_icon
+        self.icon_pos = (restart_button_bounds.x + 8, restart_button_bounds.y + 8)
+
     def handle_event(self, event: pygame.event.Event):
         """Event handler."""
         self.board.handle_event(event)
@@ -59,7 +71,10 @@ class GameWindow(WindowBase):
         elif event.type == TIMER_TICK:
             self.state = self.state.timer_ticked()
         elif event.type == GAME_OVER:
-            pass
+            if self.state.is_win():
+                self.icon = self.win_icon
+            else:
+                self.icon = self.lose_icon
         elif event.type == GAME_RESTART:
             # restart game
             self.context.set_window(self.context.game_window)
@@ -70,5 +85,7 @@ class GameWindow(WindowBase):
         self.timer.draw(screen)
         self.restart_button.draw(screen)
         self.bomb_cnt.draw(screen)
+
+        screen.blit(self.icon, self.icon_pos)
 
         draw_border(screen, screen.get_rect(), pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=True)
