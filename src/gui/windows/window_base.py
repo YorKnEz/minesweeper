@@ -7,10 +7,12 @@ class WindowBase:
     def __init__(self):
         pass
 
-    def handle_event(self, event: pygame.event.Event) -> "WindowBase":
-        """Abastract event handler.
+    def enter(self):
+        """Method called by the Window Manager upon choosing a window as the current window."""
+        raise NotImplementedError()
 
-        It returns a WindowBase instance to allow window switching."""
+    def handle_event(self, event: pygame.event.Event):
+        """Abastract event handler."""
         raise NotImplementedError()
 
     def draw(self, screen: pygame.Surface):
