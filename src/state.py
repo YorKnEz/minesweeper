@@ -166,8 +166,8 @@ class GameState:
         new_state.__reveal_zone(lin, col)
 
         # if the number of unrevealed_zones is equal to the number of bombs, then the game is over
-        if self.is_win():
-            self.__end_game()
+        if new_state.is_win():
+            new_state.__end_game()
 
         return new_state
 
