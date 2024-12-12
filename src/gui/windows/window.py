@@ -42,8 +42,10 @@ class Window:
         self.time = int(time) if len(time) > 0 else 0
         # bombs should be at most 999, the max displayable number
         # the default value is xy / 8
+        # bombs = int(bombs) if len(bombs) > 0 else 999
         self.bombs = min(
             999,
+            self.x * self.y - 1,
             int(bombs if len(bombs) > 0 else (self.x * self.y) / 8),
         )
 
