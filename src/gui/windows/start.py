@@ -66,7 +66,12 @@ class StartWindow(WindowBase):
             )
             # start game
             self.context.set_window(self.context.game_window)
-            return
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+            for i, input in enumerate(self.inputs):
+                if input.active:
+                    input.active = False
+                    self.inputs[(i + 1) % len(self.inputs)].active = True
+                    break
 
     def draw(self, screen: pygame.Surface):
         """Draw window on the screen."""
