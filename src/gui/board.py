@@ -29,7 +29,7 @@ class Board:
         self.height, self.width = state.size
         self.board = deepcopy(state.board)
 
-        self.surface = pygame.Surface((self.height * Board.CELL_SIZE, self.width * Board.CELL_SIZE))
+        self.surface = pygame.Surface((self.width * Board.CELL_SIZE, self.height * Board.CELL_SIZE))
 
         # used for drawing only part of the surface
         self.surface_area = self.surface.get_rect()
