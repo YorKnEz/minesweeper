@@ -28,6 +28,7 @@ class GameState:
         """
         self.height, self.width = self.size = size
         self.max_bombs = max_bombs
+        self.flags = max_bombs
         self.time_left = time
 
         # board with all bombs and all cells marked with their score
@@ -77,8 +78,6 @@ class GameState:
                 lin, col, mine_lin, mine_col
             ):
                 mine_col, mine_lin = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-
-                # check if the generated position is either (lin, col) or around it
 
             self.zones[mine_lin][mine_col] = BoardCell.BOMB.value
 
@@ -185,12 +184,15 @@ class GameState:
             return new_state
 
         if new_state.board[lin][col] == BoardCell.UNSELECTED.value:
-            # if the cell is unselected, flag it
-            new_state.board[lin][col] = BoardCell.FLAGGED.value
-            pygame.event.post(pygame.event.Event(BOARD_FLAG_PLACED))
+            # if the cell is unselected, flag it and flags left
+            if new_state.flags > 0:
+                new_state.board[lin][col] = BoardCell.FLAGGED.value
+                new_state.flags -= 1
+                pygame.event.post(pygame.event.Event(BOARD_FLAG_PLACED))
         elif new_state.board[lin][col] == BoardCell.FLAGGED.value:
             # if the cell is flagged, unflag it
             new_state.board[lin][col] = BoardCell.UNSELECTED.value
+            new_state.flags += 1
             pygame.event.post(pygame.event.Event(BOARD_FLAG_REMOVED))
 
         # if the cell was neither of the above, just ignore the move
