@@ -2,7 +2,9 @@ from copy import deepcopy
 
 import pygame
 
-from constants import BOARD_FLAG, BOARD_REVEAL, MOUSEBUTTONLEFT, MOUSEBUTTONRIGHT
+from constants import (BOARD_DOWN, BOARD_FLAG, BOARD_LEFT, BOARD_REVEAL,
+                       BOARD_RIGHT, BOARD_UP, MOUSEBUTTONLEFT,
+                       MOUSEBUTTONRIGHT)
 from state import BoardCell, GameState
 from theme import Theme
 from utils import clamp, draw_border
@@ -18,7 +20,16 @@ class Board:
 
     CELL_SIZE = 32
 
-    BOARD_SHIFT = {pygame.K_LEFT: (-1, 0), pygame.K_UP: (0, -1), pygame.K_RIGHT: (1, 0), pygame.K_DOWN: (0, 1)}
+    BOARD_SHIFT = {
+        pygame.K_LEFT: (-1, 0),
+        pygame.K_UP: (0, -1),
+        pygame.K_RIGHT: (1, 0),
+        pygame.K_DOWN: (0, 1),
+        BOARD_LEFT: (-1, 0),
+        BOARD_UP: (0, -1),
+        BOARD_RIGHT: (1, 0),
+        BOARD_DOWN: (0, 1),
+    }
 
     def __init__(self, bounds: pygame.Rect, state: GameState, font: pygame.font.Font):
         """Init the board based on the current state of the game."""
@@ -156,6 +167,19 @@ class Board:
                 rect.center = cell_bounds.center
                 self.surface.blit(text, rect)
 
+    def __shift_board(self, direction, offset=2):
+        """Move the board view by a given offset in a specified direction.
+
+        If the movement would cause the board to get outside of the bounds of its surface area,
+        the move will be clamped.
+        """
+        off_x, off_y = direction
+        off_x *= 2 * Board.CELL_SIZE
+        off_y *= 2 * Board.CELL_SIZE
+
+        self.surface_area.x = clamp(self.surface_area.x + off_x, 0, self.surface_bounds.width - self.bounds.width)
+        self.surface_area.y = clamp(self.surface_area.y + off_y, 0, self.surface_bounds.height - self.bounds.height)
+
     def handle_event(self, event):
         """Event handler."""
         if event.type == pygame.MOUSEBUTTONUP:
@@ -175,18 +199,12 @@ class Board:
                 pass
             elif right:
                 pass
-        # move board by 2 cells in the specified direction
-        elif event.type == pygame.KEYUP:
-            # ignore other keys
-            if event.key not in Board.BOARD_SHIFT.keys():
-                return
-
-            off_x, off_y = Board.BOARD_SHIFT[event.key]
-            off_x *= 2 * Board.CELL_SIZE
-            off_y *= 2 * Board.CELL_SIZE
-
-            self.surface_area.x = clamp(self.surface_area.x + off_x, 0, self.surface_bounds.width - self.bounds.width)
-            self.surface_area.y = clamp(self.surface_area.y + off_y, 0, self.surface_bounds.height - self.bounds.height)
+        elif event.type == pygame.KEYUP and event.key in Board.BOARD_SHIFT.keys():
+            # move board by 2 cells in the specified direction if user pressed arrow keys
+            self.__shift_board(Board.BOARD_SHIFT[event.key])
+        elif event.type in Board.BOARD_SHIFT.keys():
+            # move board by 2 cells if the move event has been fired
+            self.__shift_board(Board.BOARD_SHIFT[event.type])
 
     def update(self, state: GameState):
         """Update the board with the given state."""

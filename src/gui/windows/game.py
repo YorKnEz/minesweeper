@@ -1,6 +1,7 @@
 import pygame
 
-from constants import (BOARD_FLAG, BOARD_REVEAL, GAME_OVER, GAME_RESTART,
+from constants import (BOARD_DOWN, BOARD_FLAG, BOARD_LEFT, BOARD_REVEAL,
+                       BOARD_RIGHT, BOARD_UP, GAME_OVER, GAME_RESTART,
                        TIMER_TICK)
 from gui import Board, BombCounter, Timer
 from gui.button import Button
@@ -27,7 +28,7 @@ class GameWindow(WindowBase):
             time=self.context.time,
         )
 
-        board_bounds = pygame.Rect((self.width - 512) / 2, 64 + (self.height - 512) / 2, 512, 512)
+        board_bounds = pygame.Rect((self.width - 512) / 2, (self.height - 512) / 2, 512, 512)
         self.board = Board(board_bounds, self.state, self.font)
 
         timer_bounds = pygame.Rect(board_bounds.left, board_bounds.top - 96, 100, 64)
@@ -47,12 +48,36 @@ class GameWindow(WindowBase):
         self.icon = self.restart_icon
         self.icon_pos = (restart_button_bounds.x + 8, restart_button_bounds.y + 8)
 
+        pos = [
+            (board_bounds.left, board_bounds.bottom + 32),
+            (board_bounds.left + 64 + 16, board_bounds.bottom + 32),
+            (board_bounds.right - 2 * (64) - 16, board_bounds.bottom + 32),
+            (board_bounds.right - 64, board_bounds.bottom + 32),
+        ]
+        dir = [("up", BOARD_UP), ("down", BOARD_DOWN), ("left", BOARD_LEFT), ("right", BOARD_RIGHT)]
+
+        self.controls = []
+        self.controls_icons = []
+        self.controls_icons_pos = []
+
+        for (x, y), (dir, ev) in zip(pos, dir):
+            button = Button(pygame.Rect(x, y, 64, 64), Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, ev)
+
+            self.controls.append(button)
+            self.controls_icons.append(
+                pygame.transform.scale(pygame.image.load(f"assets/{dir}.png").convert_alpha(), (48, 48))
+            )
+            self.controls_icons_pos.append((button.bounds.x + 8, button.bounds.y + 8))
+
     def handle_event(self, event: pygame.event.Event):
         """Event handler."""
         self.board.handle_event(event)
         self.timer.handle_event(event)
         self.bomb_cnt.handle_event(event)
         self.restart_button.handle_event(event)
+
+        for button in self.controls:
+            button.handle_event(event)
 
         if event.type == BOARD_REVEAL:
             l, c = event.dict.values()
@@ -79,6 +104,11 @@ class GameWindow(WindowBase):
         self.timer.draw(screen)
         self.restart_button.draw(screen)
         self.bomb_cnt.draw(screen)
+
+        for c, i, p in zip(self.controls, self.controls_icons, self.controls_icons_pos):
+            c.draw(screen)
+            draw_border(screen, c.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=False)
+            screen.blit(i, p)
 
         screen.blit(self.icon, self.icon_pos)
 
