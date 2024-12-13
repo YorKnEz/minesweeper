@@ -13,4 +13,4 @@ class Theme:
     UNREVEALED_BG_COLOR = "grey30"
     REVEALED_BOMB_BG_COLOR = "darkred"
 
-    CELL_COLORS = ["blue", "green", "red", "purple"]
+    CELL_COLORS = ["blue", "green", "red", "purple", "darkgoldenrod1", "deepskyblue", "deeppink1", "darkolivegreen1"]

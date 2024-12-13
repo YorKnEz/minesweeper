@@ -4,7 +4,8 @@ from enum import Enum
 
 import pygame
 
-from constants import BOARD_FLAG_PLACED, BOARD_FLAG_REMOVED, GAME_OVER, TIMER_TICK
+from constants import (BOARD_FLAG_PLACED, BOARD_FLAG_REMOVED, GAME_OVER,
+                       TIMER_TICK)
 
 
 class BoardCell(Enum):
@@ -77,7 +78,9 @@ class GameState:
             # while (self.zones[mine_lin][mine_col] == BoardCell.BOMB.value) or self.__around_cell(
             #     lin, col, mine_lin, mine_col
             # ):
-            while (self.zones[mine_lin][mine_col] == BoardCell.BOMB.value) or (mine_lin == lin and mine_col == col):
+            while (self.zones[mine_lin][mine_col] == BoardCell.BOMB.value) or self.__around_cell(
+                lin, col, mine_lin, mine_col
+            ):
                 mine_col, mine_lin = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
 
             self.zones[mine_lin][mine_col] = BoardCell.BOMB.value

@@ -1,7 +1,7 @@
 import pygame
 
 from constants import (BOARD_DOWN, BOARD_FLAG, BOARD_LEFT, BOARD_REVEAL,
-                       BOARD_RIGHT, BOARD_UP, GAME_OVER, GAME_RESTART,
+                       BOARD_RIGHT, BOARD_UP, GAME_HOME, GAME_OVER, GAME_RESTART,
                        TIMER_TICK)
 from gui import Board, BombCounter, Timer
 from gui.button import Button
@@ -42,11 +42,11 @@ class GameWindow(WindowBase):
             restart_button_bounds, Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, GAME_RESTART
         )
 
-        self.restart_icon = pygame.transform.scale(pygame.image.load("assets/reset.png").convert_alpha(), (48, 48))
+        self.reset_icon = pygame.transform.scale(pygame.image.load("assets/reset.png").convert_alpha(), (48, 48))
         self.lose_icon = pygame.transform.scale(pygame.image.load("assets/lose.png").convert_alpha(), (48, 48))
         self.win_icon = pygame.transform.scale(pygame.image.load("assets/win.png").convert_alpha(), (48, 48))
-        self.icon = self.restart_icon
-        self.icon_pos = (restart_button_bounds.x + 8, restart_button_bounds.y + 8)
+        self.restart_icon = self.reset_icon
+        self.restart_icon_pos = (restart_button_bounds.x + 8, restart_button_bounds.y + 8)
 
         pos = [
             (board_bounds.left, board_bounds.bottom + 32),
@@ -69,12 +69,20 @@ class GameWindow(WindowBase):
             )
             self.controls_icons_pos.append((button.bounds.x + 8, button.bounds.y + 8))
 
+        home_button_bounds = pygame.Rect((self.width - 64) / 2, board_bounds.bottom + 32, 64, 64)
+        self.home_button = Button(
+            home_button_bounds, Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, GAME_HOME
+        )
+        self.home_icon = pygame.transform.scale(pygame.image.load("assets/home.png").convert_alpha(), (48, 48))
+        self.home_icon_pos = (home_button_bounds.x + 8, home_button_bounds.y + 8)
+
     def handle_event(self, event: pygame.event.Event):
         """Event handler."""
         self.board.handle_event(event)
         self.timer.handle_event(event)
         self.bomb_cnt.handle_event(event)
         self.restart_button.handle_event(event)
+        self.home_button.handle_event(event)
 
         for button in self.controls:
             button.handle_event(event)
@@ -91,25 +99,32 @@ class GameWindow(WindowBase):
             self.state = self.state.timer_ticked()
         elif event.type == GAME_OVER:
             if self.state.is_win():
-                self.icon = self.win_icon
+                self.restart_icon = self.win_icon
             else:
-                self.icon = self.lose_icon
+                self.restart_icon = self.lose_icon
         elif event.type == GAME_RESTART:
             # restart game
             self.context.set_window(self.context.game_window)
+        elif event.type == GAME_HOME:
+            # go to home window
+            self.context.set_window(self.context.start_window)
 
     def draw(self, screen: pygame.Surface):
         """Draw game on the screen."""
         self.board.draw(screen)
         self.timer.draw(screen)
-        self.restart_button.draw(screen)
         self.bomb_cnt.draw(screen)
+
+        self.restart_button.draw(screen)
+        screen.blit(self.restart_icon, self.restart_icon_pos)
+
+        self.home_button.draw(screen)
+        screen.blit(self.home_icon, self.home_icon_pos)
 
         for c, i, p in zip(self.controls, self.controls_icons, self.controls_icons_pos):
             c.draw(screen)
             draw_border(screen, c.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=False)
             screen.blit(i, p)
 
-        screen.blit(self.icon, self.icon_pos)
 
         draw_border(screen, screen.get_rect(), pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=True)
