@@ -42,6 +42,8 @@ class GameWindow(WindowBase):
 
         Upon entering this window again, the state must be restarted and the UI elements redrawn, in order to reflect
         the new state of the game."""
+        # stop timer from last game
+        pygame.time.set_timer(TIMER_TICK, 0)
         # init the game using context params
         self.state = GameState(
             size=(self.context.x, self.context.y),

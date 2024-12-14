@@ -38,17 +38,19 @@ class Window:
         The provided params are all strings which are parsed and interpreted by this method.
         In case any of the values are invalid, the method automatically sets a favorable default.
         """
-        self.x = int(x) if len(x) > 0 else 16
-        self.y = int(y) if len(y) > 0 else 16
+        # cap x and y to 4 on the lower end
+        self.x = max(4, int(x) if len(x) > 0 else 16)
+        self.y = max(4, int(y) if len(y) > 0 else 16)
         self.time = int(time) if len(time) > 0 else 0
         # bombs should be at most 999, the max displayable number
         # the default value is xy / 8
         # bombs = int(bombs) if len(bombs) > 0 else 999
         self.bombs = min(
             999,
-            self.x * self.y - 1,
+            self.x * self.y - 9,
             int(bombs if len(bombs) > 0 else (self.x * self.y) / 8),
         )
+        print(self.bombs)
 
     def handle_event(self, event: pygame.event.Event):
         """Event handler."""
