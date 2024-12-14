@@ -14,6 +14,23 @@ from utils import draw_border
 class GameWindow(WindowBase):
     def __init__(self, width, height, font: pygame.font.Font, context):
         """Initializes the game window."""
+        super().__init__()
+        self.home_icon_pos = None
+        self.home_icon = None
+        self.home_button = None
+        self.controls_icons_pos = None
+        self.controls_icons = None
+        self.controls = None
+        self.restart_icon_pos = None
+        self.restart_icon = None
+        self.win_icon = None
+        self.lose_icon = None
+        self.reset_icon = None
+        self.restart_button = None
+        self.bomb_cnt = None
+        self.timer = None
+        self.board = None
+        self.state = None
         self.width, self.height = width, height
         self.font = font
         self.context = context
@@ -21,6 +38,10 @@ class GameWindow(WindowBase):
         self.enter()
 
     def enter(self):
+        """Reinitialize the game window.
+
+        Upon entering this window again, the state must be restarted and the UI elements redrawn, in order to reflect
+        the new state of the game."""
         # init the game using context params
         self.state = GameState(
             size=(self.context.x, self.context.y),
@@ -51,21 +72,21 @@ class GameWindow(WindowBase):
         pos = [
             (board_bounds.left, board_bounds.bottom + 32),
             (board_bounds.left + 64 + 16, board_bounds.bottom + 32),
-            (board_bounds.right - 2 * (64) - 16, board_bounds.bottom + 32),
+            (board_bounds.right - 2 * 64 - 16, board_bounds.bottom + 32),
             (board_bounds.right - 64, board_bounds.bottom + 32),
         ]
-        dir = [("up", BOARD_UP), ("down", BOARD_DOWN), ("left", BOARD_LEFT), ("right", BOARD_RIGHT)]
+        dirs = [("up", BOARD_UP), ("down", BOARD_DOWN), ("left", BOARD_LEFT), ("right", BOARD_RIGHT)]
 
         self.controls = []
         self.controls_icons = []
         self.controls_icons_pos = []
 
-        for (x, y), (dir, ev) in zip(pos, dir):
+        for (x, y), (d, ev) in zip(pos, dirs):
             button = Button(pygame.Rect(x, y, 64, 64), Theme.BG_COLOR, "", Theme.TEXT_COLOR, self.font, ev)
 
             self.controls.append(button)
             self.controls_icons.append(
-                pygame.transform.scale(pygame.image.load(f"assets/{dir}.png").convert_alpha(), (48, 48))
+                pygame.transform.scale(pygame.image.load(f"assets/{d}.png").convert_alpha(), (48, 48))
             )
             self.controls_icons_pos.append((button.bounds.x + 8, button.bounds.y + 8))
 
@@ -106,7 +127,7 @@ class GameWindow(WindowBase):
             # restart game
             self.context.set_window(self.context.game_window)
         elif event.type == GAME_HOME:
-            # go to home window
+            # go to the home window
             self.context.set_window(self.context.start_window)
 
     def draw(self, screen: pygame.Surface):
@@ -125,6 +146,5 @@ class GameWindow(WindowBase):
             c.draw(screen)
             draw_border(screen, c.bounds, pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=False)
             screen.blit(i, p)
-
 
         draw_border(screen, screen.get_rect(), pygame.Color(Theme.BG_COLOR), width=8, depth="up", inner=True)

@@ -1,7 +1,12 @@
+"""Start the Minesweeper game.
+
+No arguments are needed. The game will open in a new window and will be playable out of the box.
+"""
+
 import pygame
 
 from constants import FPS
-from gui.windows.window import Window
+from gui import Window
 from theme import Theme
 
 pygame.init()

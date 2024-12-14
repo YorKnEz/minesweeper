@@ -10,6 +10,7 @@ from utils import draw_border
 class StartWindow(WindowBase):
     def __init__(self, width, height, font: pygame.font.Font, context):
         """Initializes the game window."""
+        super().__init__()
         self.font = font
         self.context = context
 
@@ -52,8 +53,8 @@ class StartWindow(WindowBase):
 
     def handle_event(self, event: pygame.event.Event):
         """Event handler."""
-        for input in self.inputs:
-            input.handle_event(event)
+        for text_input in self.inputs:
+            text_input.handle_event(event)
         self.button.handle_event(event)
 
         if event.type == GAME_START:
@@ -67,16 +68,16 @@ class StartWindow(WindowBase):
             # start game
             self.context.set_window(self.context.game_window)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
-            for i, input in enumerate(self.inputs):
-                if input.active:
-                    input.active = False
+            for i, text_input in enumerate(self.inputs):
+                if text_input.active:
+                    text_input.active = False
                     self.inputs[(i + 1) % len(self.inputs)].active = True
                     break
 
     def draw(self, screen: pygame.Surface):
         """Draw window on the screen."""
-        for input in self.inputs:
-            input.draw(screen)
+        for text_input in self.inputs:
+            text_input.draw(screen)
 
         self.button.draw(screen)
 

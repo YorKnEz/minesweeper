@@ -12,6 +12,7 @@ class Window:
     """
 
     def __init__(self, width, height, font):
+        self.current_window = None
         self.width, self.height, self.font = width, height, font
 
         # default params for game

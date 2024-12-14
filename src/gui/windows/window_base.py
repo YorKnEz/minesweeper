@@ -12,7 +12,7 @@ class WindowBase:
         raise NotImplementedError()
 
     def handle_event(self, event: pygame.event.Event):
-        """Abastract event handler."""
+        """Abstract event handler."""
         raise NotImplementedError()
 
     def draw(self, screen: pygame.Surface):

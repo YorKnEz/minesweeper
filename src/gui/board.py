@@ -15,11 +15,11 @@ class Board:
 
     It can display a board of any size, even if it doesn't fit the screen.
     """
-
+    # default border width
     BORDER_WIDTH = 2
-
+    # default cell size
     CELL_SIZE = 32
-
+    # map board move events to directions
     BOARD_SHIFT = {
         pygame.K_LEFT: (-1, 0),
         pygame.K_UP: (0, -1),
@@ -95,7 +95,7 @@ class Board:
                 # draw revealed bomb in red background
                 if self.board[i][j] == BoardCell.BOMB_REVEALED.value:
                     pygame.draw.rect(self.surface, Theme.REVEALED_BOMB_BG_COLOR, cell_bounds)
-                # draw regular bombs in darker bacground
+                # draw regular bombs in darker background
                 elif self.board[i][j] == BoardCell.BOMB.value:
                     pygame.draw.rect(self.surface, Theme.UNREVEALED_BG_COLOR, cell_bounds)
 
@@ -170,12 +170,12 @@ class Board:
     def __shift_board(self, direction, offset=2):
         """Move the board view by a given offset in a specified direction.
 
-        If the movement would cause the board to get outside of the bounds of its surface area,
+        If the movement causes the board to get outside the bounds of its surface area,
         the move will be clamped.
         """
         off_x, off_y = direction
-        off_x *= 2 * Board.CELL_SIZE
-        off_y *= 2 * Board.CELL_SIZE
+        off_x *= offset * Board.CELL_SIZE
+        off_y *= offset * Board.CELL_SIZE
 
         self.surface_area.x = clamp(self.surface_area.x + off_x, 0, self.surface_bounds.width - self.bounds.width)
         self.surface_area.y = clamp(self.surface_area.y + off_y, 0, self.surface_bounds.height - self.bounds.height)
@@ -190,15 +190,6 @@ class Board:
                 pygame.event.post(pygame.event.Event(BOARD_REVEAL, l=l, c=c))
             elif event.button == MOUSEBUTTONRIGHT:
                 pygame.event.post(pygame.event.Event(BOARD_FLAG, l=l, c=c))
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = pygame.mouse.get_pos()
-            left, _, right = pygame.mouse.get_pressed()
-            l, c = self.__get_click_pos(x, y)
-
-            if left:
-                pass
-            elif right:
-                pass
         elif event.type == pygame.KEYUP and event.key in Board.BOARD_SHIFT.keys():
             # move board by 2 cells in the specified direction if user pressed arrow keys
             self.__shift_board(Board.BOARD_SHIFT[event.key])

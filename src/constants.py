@@ -1,3 +1,12 @@
+"""The main constants used around the code.
+
+Contains:
+- FPS: The fps counter.
+- User events: BOARD_REVEAL, BOARD_FLAG, TIMER_TICK, BOARD_FLAG_PLACED, BOARD_FLAG_REMOVED, GAME_START, GAME_RESTART,
+GAME_HOME, GAME_OVER, BOARD_UP, BOARD_DOWN, BOARD_LEFT, BOARD_RIGHT.
+- Mouse buttons: MOUSEBUTTONLEFT, MOUSEBUTTONMIDDLE, MOUSEBUTTONRIGHT.
+"""
+
 import pygame
 
 FPS = 60

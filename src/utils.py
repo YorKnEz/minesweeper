@@ -1,24 +1,51 @@
+"""Provides a variety of utility functions.
+
+Functions:
+    - clamp: Clamps a value in a fixed range.
+    - adjust_color: Lightens/Darkens a color by a factor.
+    - draw_border: Draw a minesweeper-styled border around a rectangle.
+"""
 import pygame
 
 
 def clamp(x, a, b):
-    """Clamp value x in interval [a, b].
+    """Clamp value x in the interval [a, b].
 
     It is assumed a <= b.
+
+    :param x: The value to clamp.
+    :param a: The lower bound.
+    :param b: The upper bound.
+    :return: The clamped value.
     """
     return max(a, min(b, x))
 
 
 def adjust_color(color, factor):
+    """Adjust the color by a given factor.
+
+    Typically used for getting a slightly lighter/darker tone of a given color.
+
+    :param color: The color to adjust.
+    :param factor: The factor to adjust.
+    :return: The adjusted color.
+    """
     return tuple(min(255, max(0, int(c * factor))) for c in color)
 
 
 def draw_border(
-    surface: pygame.Surface, bounds: pygame.Rect, border_color: pygame.Color, width=1, depth="up", inner=False
+        surface: pygame.Surface, bounds: pygame.Rect, border_color: pygame.Color, width=1, depth="up", inner=False
 ):
     """Draw a minesweeper-styled border around a given rect.
 
-    Depth parameter can be either "up" or "down" specifying the effect the border will have.
+    :param surface: The surface to draw on.
+    :param bounds: The bounds around which to draw the border.
+    :param border_color: The color of the border.
+    :param width: The width of the border (default 1).
+    :param depth: The effect of the border: if "up", then the border will look as if raises the level of the rect,
+    otherwise it will look as if it lowers the level of the rect (default "up").
+    :param inner: Whether the border is inner or outer (i.e. if the border is drawn inside or outside the bounds of the
+    rect) (default False).
     """
 
     lighter_color = adjust_color(border_color, 1.3 if depth == "up" else 0.7)

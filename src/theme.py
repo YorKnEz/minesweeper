@@ -1,7 +1,14 @@
+"""Contains all the theme-related variables.
+
+Classes:
+    - Theme: The main theme-related variables.
+"""
 import pygame
 
 
 class Theme:
+    """The main theme-related variables."""
+
     BG_COLOR = "grey20"
     TEXT_COLOR = "white"
 

@@ -1,3 +1,4 @@
+
 import pygame
 
 from constants import MOUSEBUTTONLEFT
@@ -6,6 +7,26 @@ from utils import adjust_color, draw_border
 
 
 class Input:
+    """Text input component.
+
+    Instance variables:
+        - bounds: The bounds of the input.
+        - font: The font of the input.
+        - text_color: The color of the text.
+        - bg_color: The background color of the input.
+        - max_length: The maximum length of the text.
+        - text: The input text.
+        - placeholder: The placeholder text.
+        - cursor_pos: The cursor position of the input.
+        - active: Whether the input is active.
+
+    Methods:
+        - __init__: Initialize the input.
+        - handle_event: Handle input events.
+        - draw: Draw the input.
+        - set_active: Set the input as active. This means it can be edited.
+    """
+
     def __init__(self, bounds, font, max_length, placeholder="", text_color=(255, 255, 255), bg_color=(0, 0, 0)):
         """Initialize a single-line text input."""
         self.bounds = pygame.Rect(bounds)
@@ -25,11 +46,11 @@ class Input:
         if event.type == pygame.KEYDOWN and self.active:
             if event.key == pygame.K_BACKSPACE:
                 if self.cursor_pos > 0:
-                    self.text = self.text[: self.cursor_pos - 1] + self.text[self.cursor_pos :]
+                    self.text = self.text[: self.cursor_pos - 1] + self.text[self.cursor_pos:]
                     self.cursor_pos -= 1
             elif event.key == pygame.K_DELETE:
                 if self.cursor_pos < len(self.text):
-                    self.text = self.text[: self.cursor_pos] + self.text[self.cursor_pos + 1 :]
+                    self.text = self.text[: self.cursor_pos] + self.text[self.cursor_pos + 1:]
             elif event.key == pygame.K_LEFT:
                 if self.cursor_pos > 0:
                     self.cursor_pos -= 1
@@ -43,7 +64,7 @@ class Input:
             else:
                 # Add new character if within max_length and the character is a digit
                 if event.unicode.isdigit() and len(self.text) < self.max_length:
-                    self.text = self.text[: self.cursor_pos] + event.unicode + self.text[self.cursor_pos :]
+                    self.text = self.text[: self.cursor_pos] + event.unicode + self.text[self.cursor_pos:]
                     self.cursor_pos += 1
         elif event.type == pygame.MOUSEBUTTONUP and event.button == MOUSEBUTTONLEFT:
             # activate the input if it's been clicked

@@ -1,3 +1,10 @@
+"""Describes the state of the game.
+
+Classes:
+    - BoardCell: Enum for the Minesweeper board cell types.
+    - GameState: Describes the game state.
+"""
+
 import random
 from copy import deepcopy
 from enum import Enum
@@ -9,6 +16,8 @@ from constants import (BOARD_FLAG_PLACED, BOARD_FLAG_REMOVED, GAME_OVER,
 
 
 class BoardCell(Enum):
+    """Enum for the Minesweeper board cell types."""
+
     BOMB_REVEALED = 17
     BOMB = 16
     UNSELECTED = -1
@@ -16,18 +25,56 @@ class BoardCell(Enum):
 
 
 class GameState:
+    """Describes the game state.
+
+    Instance variables:
+        - height: Height of the board (default 16).
+        - width: Width of the board (default 16).
+        - max_bombs: The maximum number of bombs to place on the board (default 64).
+        - flags: How many flags the player has left to use.
+        - time_left: How much time the player has left to solve the puzzle.
+        - zones: Board with all cells unrevealed, contains all bombs and values.
+        - board: Board the player sees. Possible values:
+            - `BoardCell.UNSELECTED.value` indicating that the player doesn't know yet the value of this cell
+            - `BoardCell.FLAGGED.value` indicating that the player flagged this cell
+            - `BoardCell.BOMB.value` indicating that the cell is a bomb
+            - Positive values from 0 to 8 signify the amount of bombs around the cell.
+        Initially, the board is set on all field with `BoardCell.UNSELECTED.value`
+        - game_over: Whether the game is over.
+        - init: Whether the player has started the game. The board is not generated until this flag is set to `True`.
+        - unrevealed_zones: The number of unrevealed zones left. If this number equals `width * height - max_bombs`,
+        the game is over.
+
+    Methods:
+        - __init__: Constructor for an uninitialized game state.
+        - reveal_zone: Reveal the value of a cell. This is a player move.
+        - flag_zone: Flag a cell. This is a player move.
+        - timer_ticked: Update state upon timer tick.
+        - is_over: Whether the game is over.
+        - is_win: Whether the game is won.
+    """
     # offsets for neighbors
-    DL = [-1, -1, 0, 1, 1, 1, 0, -1]
-    DC = [0, 1, 1, 1, 0, -1, -1, -1]
+    __DL = [-1, -1, 0, 1, 1, 1, 0, -1]
+    __DC = [0, 1, 1, 1, 0, -1, -1, -1]
 
     def __init__(self, *, size: tuple[int, int] = (16, 16), max_bombs=64, time=0):
         """Initialize game state.
 
-        The `size` parameter determines the size of the grid.
-        The `max_bombs` parameter determines the number of bombs to generate, it must be between 0 and `size`.
-        The `time` parameter determines how much time the player has (if it is 0, then the timer is disabled).
+        :param size: The size of the grid. Must be at least 4x4.
+        :param max_bombs: The number of bombs to generate. Must be between 0 and `size - 9`.
+        :param time: The time the player has to solve the game (if it is 0, then the timer is disabled).
+
+        :raises ValueError: `size` is less than 4x4.
+        :raises ValueError: `max_bombs` is not in `[0, size - 9]`.
         """
         self.height, self.width = self.size = size
+
+        if self.height < 4 or self.width < 4:
+            raise ValueError('Invalid `size` argument.')
+
+        if not (0 <= max_bombs <= self.height * self.width - 9):
+            raise ValueError('Invalid `max_bombs` argument.')
+
         self.max_bombs = max_bombs
         self.flags = max_bombs
         self.time_left = time
@@ -49,14 +96,14 @@ class GameState:
         self.unrevealed_zones = self.width * self.height  # used for checking the win condition
 
     def __within_bounds(self, lin, col):
-        """Check if point `(lin, col)` is found on the grid."""
+        """Check whether the given coordinates are within the bounds of the board."""
         return 0 <= lin < self.height and 0 <= col < self.width
 
     def __around_cell(self, cell_lin, cell_col, lin, col):
         """Check if `(lin, col)` is a point around or precisely `(cell_lin, cell_col)`."""
         return (cell_lin == lin and cell_col == col) or any(
             (cell_lin == lin + dl) and (cell_col == col + dc)
-            for dl, dc in zip(GameState.DL, GameState.DC)
+            for dl, dc in zip(GameState.__DL, GameState.__DC)
             if self.__within_bounds(lin + dl, col + dc)
         )
 
@@ -65,7 +112,7 @@ class GameState:
 
         This generates the board for the game after the first click has happened. The `(lin, col)` argument specifies
         the coordinates of the click.
-        It also starts the counter if there is any.
+        It also starts the counter if `time_left` is non-zero.
         """
         bombs = self.max_bombs
 
@@ -79,7 +126,7 @@ class GameState:
             #     lin, col, mine_lin, mine_col
             # ):
             while (self.zones[mine_lin][mine_col] == BoardCell.BOMB.value) or self.__around_cell(
-                lin, col, mine_lin, mine_col
+                    lin, col, mine_lin, mine_col
             ):
                 mine_col, mine_lin = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
 
@@ -98,7 +145,7 @@ class GameState:
                 self.zones[lin][col] = sum(
                     self.__within_bounds(lin + off_lin, col + off_col)
                     and self.zones[lin + off_lin][col + off_col] == BoardCell.BOMB.value
-                    for off_lin, off_col in zip(GameState.DL, GameState.DC)
+                    for off_lin, off_col in zip(GameState.__DL, GameState.__DC)
                 )
 
         # set a timer for the game
@@ -109,7 +156,13 @@ class GameState:
         self.init = True
 
     def __end_game(self):
-        """Sets the `game_over` flag to True and stops the timer (if it exists)."""
+        """Stop the current game.
+
+        This actions does the following:
+        - Set `game_over` to `True`.
+        - Stop the timer (if it exists).
+        - Signal the pygame event loop that the game is over.
+        """
         self.game_over = True
         pygame.time.set_timer(TIMER_TICK, 0)
         pygame.event.post(pygame.event.Event(GAME_OVER))
@@ -134,12 +187,12 @@ class GameState:
 
         # if the cell is zero, continue exploring
         if self.board[lin][col] == 0:
-            for dl, dc in zip(GameState.DL, GameState.DC):
+            for dl, dc in zip(GameState.__DL, GameState.__DC):
                 if self.__within_bounds(lin + dl, col + dc):
                     self.__reveal_zone(lin + dl, col + dc)
 
     def __reveal_bombs(self):
-        """Upon losing the game, this method is called to reveal the bombs locations to the player."""
+        """Reveal the bombs locations to the player."""
         for i in range(self.height):
             for j in range(self.width):
                 if self.zones[i][j] == BoardCell.BOMB.value:
@@ -153,7 +206,9 @@ class GameState:
 
         If the game is over or the given position is invalid, the move is ignored.
 
-        It returns the new state of the game, thus keeping the state immutable.
+        :param lin: The line of the zone to reveal.
+        :param col: The column of the zone to reveal.
+        :return: The new state of the game upon executing the move.
         """
         # if the game hasn't been initialized, start it
         if not self.init:
@@ -174,12 +229,14 @@ class GameState:
 
         return new_state
 
-    def flag_zone(self, lin, col):
-        """Flag/unflag the zone.
+    def flag_zone(self, lin, col) -> "GameState":
+        """Flag/un-flag the zone.
 
         If the game has not been started yet, or the game is over or the given position is invalid, the move is ignored.
 
-        It returns the new state of the game, thus keeping the state immutable.
+        :param lin: The line of the zone to flag.
+        :param col: The column of the zone to flag.
+        :return: The new state of the game upon executing the move.
         """
         new_state = deepcopy(self)
 
@@ -194,7 +251,7 @@ class GameState:
                 new_state.flags -= 1
                 pygame.event.post(pygame.event.Event(BOARD_FLAG_PLACED))
         elif new_state.board[lin][col] == BoardCell.FLAGGED.value:
-            # if the cell is flagged, unflag it
+            # if the cell is flagged, un-flag it
             new_state.board[lin][col] = BoardCell.UNSELECTED.value
             new_state.flags += 1
             pygame.event.post(pygame.event.Event(BOARD_FLAG_REMOVED))
@@ -203,12 +260,12 @@ class GameState:
 
         return new_state
 
-    def timer_ticked(self):
+    def timer_ticked(self) -> "GameState":
         """Update the state on timer tick.
 
         If the game has not started yet, the move is ignored.
 
-        It returns the new state of the game, thus keeping the state immutable.
+        :return: Returns the new state of the game upon executing the move.
         """
         new_state = deepcopy(self)
 
@@ -229,6 +286,6 @@ class GameState:
         return self.game_over
 
     def is_win(self):
-        """Check if the game was won or not."""
+        """Check if the game was won."""
         # if the number of unrevealed_zones is equal to the number of bombs, then the game is over
         return self.unrevealed_zones == self.max_bombs
