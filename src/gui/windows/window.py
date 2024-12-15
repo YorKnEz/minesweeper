@@ -43,12 +43,12 @@ class Window:
         self.y = max(4, int(y) if len(y) > 0 else 16)
         self.time = int(time) if len(time) > 0 else 0
         # bombs should be at most 999, the max displayable number
+        # bombs should be at most 3xy / 4 (if its less than 999) -- 75% bombs
         # the default value is xy / 8
-        # bombs = int(bombs) if len(bombs) > 0 else 999
         self.bombs = min(
             999,
-            self.x * self.y - 9,
-            int(bombs if len(bombs) > 0 else (self.x * self.y) / 8),
+            3 * self.x * self.y // 4,
+            int(bombs if len(bombs) > 0 else (self.x * self.y) // 8),
         )
 
     def handle_event(self, event: pygame.event.Event):
