@@ -50,7 +50,6 @@ class Window:
             self.x * self.y - 9,
             int(bombs if len(bombs) > 0 else (self.x * self.y) / 8),
         )
-        print(self.bombs)
 
     def handle_event(self, event: pygame.event.Event):
         """Event handler."""

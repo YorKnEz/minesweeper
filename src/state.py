@@ -173,17 +173,17 @@ class GameState:
         if self.board[lin][col] != BoardCell.UNSELECTED.value or self.board[lin][col] == BoardCell.FLAGGED.value:
             return
 
-        # reveal zone
-        self.board[lin][col] = self.zones[lin][col]
-        self.unrevealed_zones -= 1
-
         # if the cell is a bomb, game over
-        if self.board[lin][col] == BoardCell.BOMB.value:
+        if self.zones[lin][col] == BoardCell.BOMB.value:
             self.__end_game()
             self.__reveal_bombs()
             # assign a special type to this bomb so that the player knows which bomb caused the loss
             self.board[lin][col] = BoardCell.BOMB_REVEALED.value
             return
+
+        # reveal zone
+        self.board[lin][col] = self.zones[lin][col]
+        self.unrevealed_zones -= 1
 
         # if the cell is zero, continue exploring
         if self.board[lin][col] == 0:

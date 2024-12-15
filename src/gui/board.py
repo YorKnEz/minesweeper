@@ -183,8 +183,13 @@ class Board:
     def handle_event(self, event):
         """Event handler."""
         if event.type == pygame.MOUSEBUTTONUP:
-            x, y = pygame.mouse.get_pos()
-            l, c = self.__get_click_pos(x, y)
+            mouse_pos = pygame.mouse.get_pos()
+
+            # ignore click if it's not on the board
+            if not self.bounds.collidepoint(mouse_pos):
+                return
+
+            l, c = self.__get_click_pos(*mouse_pos)
 
             if event.button == MOUSEBUTTONLEFT:
                 pygame.event.post(pygame.event.Event(BOARD_REVEAL, l=l, c=c))
