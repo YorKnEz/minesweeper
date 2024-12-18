@@ -40,14 +40,17 @@ class Button:
         self.text_rect.center = self.bounds.center
 
         self.click_event = click_event
+        self.click_bounds = pygame.Rect(
+            self.bounds.x - 8, self.bounds.y - 8, self.bounds.width + 16, self.bounds.height + 16
+        )
 
     def handle_event(self, event):
         """Event handler."""
         # check if the user clicked the button and fire the given event
         if (
-                event.type == pygame.MOUSEBUTTONUP
-                and event.button == MOUSEBUTTONLEFT
-                and self.bounds.collidepoint(pygame.mouse.get_pos())
+            event.type == pygame.MOUSEBUTTONUP
+            and event.button == MOUSEBUTTONLEFT
+            and self.click_bounds.collidepoint(pygame.mouse.get_pos())
         ):
             pygame.event.post(pygame.event.Event(self.click_event))
 

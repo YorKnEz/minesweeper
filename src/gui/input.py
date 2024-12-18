@@ -40,6 +40,9 @@ class Input:
         self.cursor_pos = 0
 
         self.active = False  # Input box starts active by default
+        self.click_bounds = pygame.Rect(
+            self.bounds.x - 8, self.bounds.y - 8, self.bounds.width + 16, self.bounds.height + 16
+        )
 
     def handle_event(self, event):
         """Handle keyboard events for the text input."""
@@ -68,7 +71,7 @@ class Input:
                     self.cursor_pos += 1
         elif event.type == pygame.MOUSEBUTTONUP and event.button == MOUSEBUTTONLEFT:
             # activate the input if it's been clicked
-            if self.bounds.collidepoint(pygame.mouse.get_pos()):
+            if self.click_bounds.collidepoint(pygame.mouse.get_pos()):
                 self.active = True
             else:
                 self.active = False
